@@ -2,19 +2,12 @@ import java.util.HashSet;
 
 public class Tasks extends HashSet<Task> {
 
-    /*
-    public Task getNext(Task task) {
-        Iterator<Task> tasks = this.iterator();
-        while (tasks.hasNext()) {
-            Task target = tasks.next();
-            if (target.equals(task)) {
-                return tasks.hasNext() ? tasks.next() : null;
-            }
-        }
-        return null;
+    public Tasks(HashSet<Task> tasks) {
+        super(tasks);
     }
 
-     */
+    public Tasks() {
+    }
 
     public Task getTaskByIssuingTime(int momentOfTime) {
         for (Task task : this) {

@@ -19,11 +19,8 @@ public class TaskServiceTest {
             ex.printStackTrace();
         }
 
-        try {
-            tasks = TaskService.readTaskFromStream(inputStreamReader);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        tasks = TaskService.readTaskFromStream(inputStreamReader);
+
     }
 
     @org.testng.annotations.Test

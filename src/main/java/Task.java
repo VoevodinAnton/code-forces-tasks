@@ -7,8 +7,8 @@ public class Task implements Comparable<Task> {
     private int issuingTime;
     private int leadTime;
     private int elapsedTime;
-    private int startTime;
-    private int endTime;
+    private int startTime = 0;
+    private int endTime = 0;
 
     public Task(int issuingTime, int leadTime, int elapsedTime) {
         this.id = ID_GENERATOR.getAndIncrement();

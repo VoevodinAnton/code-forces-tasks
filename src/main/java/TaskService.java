@@ -3,13 +3,17 @@ import java.util.*;
 
 public class TaskService {
 
-    public static Tasks readTaskFromStream(InputStreamReader inputStreamReader) throws IOException {
+    public static Tasks readTaskFromStream(InputStreamReader inputStreamReader) {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        int numbersOfTasks = Integer.parseInt(bufferedReader.readLine());
         List<String> lines = new ArrayList<>();
-        for (int i = 0; i < numbersOfTasks; i++) {
-            lines.add(bufferedReader.readLine());
+        try{
+            int numbersOfTasks = Integer.parseInt(bufferedReader.readLine());
+            for (int i = 0; i < numbersOfTasks; i++) {
+                lines.add(bufferedReader.readLine());
+            }
+        } catch (IOException ex){
+            ex.printStackTrace();
         }
 
         Tasks tasks = new Tasks();

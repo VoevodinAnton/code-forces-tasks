@@ -11,12 +11,7 @@ public class TaskExecutorTwo {
             ex.printStackTrace();
         }
 
-        Tasks tasks = null;
-        try {
-            tasks = TaskService.readTaskFromStream(inputStreamReader);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        Tasks tasks = TaskService.readTaskFromStream(inputStreamReader);
 
         Tasks tasksBacklog = new Tasks();
 
