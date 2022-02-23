@@ -1,4 +1,4 @@
-package completedTaskTwo;
+package completedTaskThree;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,80 +6,78 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MainClassTwo {
+public class MainClassThree {
     public static void main(String[] args) {
         InputStreamReader inputStreamReader = new InputStreamReader(System.in);
 
         Tasks tasks = TaskService.readTaskFromStream(inputStreamReader);
 
-        if (tasks.isEmpty()) {
-            printResult(Collections.EMPTY_LIST);
+        if (tasks.isEmpty()){
             return;
         }
 
         Tasks tasksBacklog = new Tasks();
+        Tasks completedTasks = new Tasks();
         Tasks remainingTasks = new Tasks(tasks);
-        List countOfIssuedTasksAtEachPointOfTime = new ArrayList<Integer>();
 
         Task currentTask = null;
         for (int momentOfTime = 0; momentOfTime <= getMaxCount(tasks); momentOfTime++) {
             if (remainingTasks.isEmpty()) {
                 break;
             }
-            //System.out.println(momentOfTime);
             if (TaskService.newTaskAppeared(momentOfTime, tasks)) {
-                currentTask = getTaskWhenNewTaskAppears(tasks, tasksBacklog, momentOfTime, currentTask);
+                Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
+                if(shouldExecute(newTask, tasksBacklog)){
+                    if (currentTask == null){
+                        currentTask = newTask;
+                    } else {
+                        tasksBacklog.add(newTask);
+                    }
+                }
             }
-            countOfIssuedTasksAtEachPointOfTime.add(tasksBacklog.size());
             if (currentTask == null) {
                 continue;
             }
             if (currentTask.getElapsedTime() == 0) {
+                completedTasks.add(currentTask);
                 tasksBacklog.remove(currentTask);
                 remainingTasks.remove(currentTask);
 
-                currentTask = getTaskWhenCurrentTaskIsCompleted(momentOfTime, tasksBacklog);
+                currentTask = getTaskWhenCurrentTaskIsCompleted(tasksBacklog);
             }
             if (currentTask == null) {
                 continue;
             }
             currentTask.setElapsedTime(currentTask.getElapsedTime() - 1);
         }
-        printResult(countOfIssuedTasksAtEachPointOfTime);
-
+        printResult(completedTasks);
     }
 
     public static int getMaxCount(Tasks tasks) {
         return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime()).reduce(0, Integer::sum);
     }
 
-    public static Task getTaskWhenNewTaskAppears(Tasks tasks, Tasks tasksBacklog, int momentOfTime, Task currentTask) {
-        Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
-        if (currentTask == null) {
-            currentTask = newTask;
-        }
-        tasksBacklog.add(newTask);
-        return currentTask;
+    public static boolean shouldExecute(Task newTask, Tasks backlog){
+        int sumElapsedTime = backlog.stream().mapToInt(Task::getElapsedTime).sum() + newTask.getElapsedTime();
+        return newTask.getLeadTime() > sumElapsedTime;
     }
 
-    public static Task getTaskWhenCurrentTaskIsCompleted(int momentOfTime, Tasks tasksBacklog) {
-        Task currentTask = TaskService.getActualShortTask(momentOfTime, tasksBacklog);
-        if (currentTask == null) {
-            currentTask = TaskService.getFreshTask(tasksBacklog);
+    public static Task getTaskWhenCurrentTaskIsCompleted(Tasks backlog){
+        if (!backlog.isEmpty()){
+            return TaskService.getEarlyTask(backlog);
         }
-        return currentTask;
+        return null;
     }
 
-    public static void printResult(List<Integer> countOfIssuedTasksAtEachPointOfTime) {
-        if (countOfIssuedTasksAtEachPointOfTime.isEmpty()) {
+    public static void printResult(Tasks completedTasks) {
+        if (completedTasks.isEmpty()) {
             System.out.println(0);
             return;
         }
-        int maxCountIssuedTasks = Collections.max(countOfIssuedTasksAtEachPointOfTime);
-        long time = countOfIssuedTasksAtEachPointOfTime.stream().filter(count -> count == maxCountIssuedTasks).count();
-
-        System.out.println(maxCountIssuedTasks);
-        System.out.println(time);
+        System.out.println(completedTasks.size());
+        for (Task task: completedTasks){
+            System.out.print(task.getId() + " ");
+        }
     }
 }
 
@@ -201,14 +199,8 @@ class TaskService {
         return tasks.stream().anyMatch(task -> momentOfTime == task.getIssuingTime());
     }
 
-    public static Task getActualShortTask(int momentOfTime, Tasks tasks) {
-        return tasks.stream()
-                .filter(task -> task.getIssuingTime() + task.getLeadTime() >= momentOfTime + task.getElapsedTime())
-                .min(Comparator.comparing(Task::getElapsedTime)).orElse(null);
-    }
-
-    public static Task getFreshTask(Tasks tasks) {
-        return tasks.stream().max(Comparator.naturalOrder()).orElse(null);
+    public static Task getEarlyTask(Tasks tasks) {
+        return tasks.stream().min(Comparator.naturalOrder()).orElse(null);
     }
 }
 

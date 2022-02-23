@@ -58,4 +58,5 @@ public class TaskService {
     public static Task getFreshTask(Tasks tasks) {
         return tasks.stream().max(Comparator.naturalOrder()).orElse(null);
     }
+
 }

@@ -18,8 +18,7 @@ public class MainClassOne {
         Tasks completedTasks = new Tasks();
         Tasks remainingTasks = new Tasks(tasks);
 
-        Task currentTask = getFirstTask(tasks);
-        setStartTime(currentTask, currentTask.getIssuingTime());
+        Task currentTask = null;
         for (int momentOfTime = 0; momentOfTime <= getMaxCount(tasks); momentOfTime++) {
             if (remainingTasks.isEmpty()) {
                 break;
@@ -46,14 +45,6 @@ public class MainClassOne {
             //System.out.println(currentTask);
         }
         printResult(completedTasks);
-    }
-
-    public static Task getFirstTask(Tasks tasks) {
-        Task currentTask = null;
-        if (tasks.iterator().hasNext()) {
-            currentTask = tasks.iterator().next();
-        }
-        return currentTask;
     }
 
     public static Task getTaskWhenNewTaskAppears(Tasks tasks, Tasks tasksBacklog, int momentOfTime, Task currentTask) {
@@ -236,20 +227,10 @@ class TaskService {
     }
 
     public static Task getShortTask(Tasks tasks) {
-        /*
-        for (Task task: tasks){
-            System.out.println(task);
-        }
-         */
         return tasks.stream().sorted(Comparator.reverseOrder()).min(Comparator.comparing(Task::getElapsedTime)).orElse(null);
     }
 
     public static Task getActualFreshTask(int momentOfTime, Tasks tasks) {
-        /*
-        for (Task task: tasks){
-            System.out.println(task);
-        }
-         */
         return tasks.stream().sorted(Comparator.reverseOrder()).
                 filter(task -> task.getIssuingTime() + task.getLeadTime() >= momentOfTime + task.getElapsedTime())
                 .findFirst().orElse(null);
