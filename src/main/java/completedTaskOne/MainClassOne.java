@@ -1,15 +1,18 @@
-package completed;
+package completedTaskOne;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MainClass {
-
+public class MainClassOne {
     public static void main(String[] args) {
         InputStreamReader inputStreamReader = new InputStreamReader(System.in);
 
         Tasks tasks = TaskService.readTaskFromStream(inputStreamReader);
+
+        if (tasks.isEmpty()){
+            return;
+        }
 
         Tasks tasksBacklog = new Tasks();
         Tasks completedTasks = new Tasks();
@@ -18,7 +21,7 @@ public class MainClass {
         Task currentTask = getFirstTask(tasks);
         setStartTime(currentTask, currentTask.getIssuingTime());
         for (int momentOfTime = 0; momentOfTime <= getMaxCount(tasks); momentOfTime++) {
-            if (remainingTasks.isEmpty()){
+            if (remainingTasks.isEmpty()) {
                 break;
             }
             //System.out.println(momentOfTime);
@@ -29,34 +32,31 @@ public class MainClass {
                 continue;
             }
             if (currentTask.getElapsedTime() == 0) {
-                currentTask = getTaskWhenCurrentTaskIsCompleted(currentTask, momentOfTime, remainingTasks, completedTasks, tasksBacklog);
+                tasksBacklog.remove(currentTask);
+                remainingTasks.remove(currentTask);
+                setEndTime(currentTask, momentOfTime);
+                completedTasks.add(currentTask);
+
+                currentTask = getTaskWhenCurrentTaskIsCompleted(momentOfTime, tasksBacklog);
             }
-            if (currentTask == null){
+            if (currentTask == null) {
                 continue;
             }
             currentTask.setElapsedTime(currentTask.getElapsedTime() - 1);
             //System.out.println(currentTask);
         }
-
-        List<Task> completedTaskList = new ArrayList<>(completedTasks);
-        completedTaskList.sort(Comparator.comparing(Task::getId));
-
-        System.out.println(completedTaskList.stream().filter(task ->
-                task.getEndTime() <= task.getIssuingTime() + task.getLeadTime()).count());
-        for (Task task: completedTaskList){
-            System.out.println(task.getStartTime() + " " + task.getEndTime());
-        }
+        printResult(completedTasks);
     }
 
-    public static Task getFirstTask(Tasks tasks){
+    public static Task getFirstTask(Tasks tasks) {
         Task currentTask = null;
-        if (tasks.iterator().hasNext()){
+        if (tasks.iterator().hasNext()) {
             currentTask = tasks.iterator().next();
         }
         return currentTask;
     }
 
-    public static Task getTaskWhenNewTaskAppears(Tasks tasks, Tasks tasksBacklog, int momentOfTime, Task currentTask){
+    public static Task getTaskWhenNewTaskAppears(Tasks tasks, Tasks tasksBacklog, int momentOfTime, Task currentTask) {
         Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
         if (currentTask == null) {
             currentTask = newTask;
@@ -75,17 +75,8 @@ public class MainClass {
         return currentTask;
     }
 
-    public static Task getTaskWhenCurrentTaskIsCompleted(Task currentTask,
-                                                         int momentOfTime,
-                                                         Tasks remainingTasks,
-                                                         Tasks completedTasks,
-                                                         Tasks tasksBacklog){
-        tasksBacklog.remove(currentTask);
-        remainingTasks.remove(currentTask);
-        setEndTime(currentTask, momentOfTime);
-        completedTasks.add(currentTask);
-
-        currentTask = TaskService.getActualFreshTask(momentOfTime, tasksBacklog);
+    public static Task getTaskWhenCurrentTaskIsCompleted(int momentOfTime, Tasks tasksBacklog) {
+        Task currentTask = TaskService.getActualFreshTask(momentOfTime, tasksBacklog);
         if (currentTask == null) {
             currentTask = TaskService.getShortTask(tasksBacklog);
         }
@@ -95,25 +86,35 @@ public class MainClass {
         return currentTask;
     }
 
-    public static int getMaxCount(Tasks tasks){
+    public static int getMaxCount(Tasks tasks) {
         return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime()).reduce(0, Integer::sum);
     }
 
-    public static void setStartTime(Task currentTask, int momentOfTime){
-        if (currentTask.getStartTime() == 0){
+    public static void setStartTime(Task currentTask, int momentOfTime) {
+        if (currentTask.getStartTime() == 0) {
             currentTask.setStartTime(momentOfTime + 1);
         }
     }
 
-    public static void setEndTime(Task currentTask, int momentOfTime){
-        if (currentTask.getStartTime() > momentOfTime){
+    public static void setEndTime(Task currentTask, int momentOfTime) {
+        if (currentTask.getStartTime() > momentOfTime) {
             currentTask.setEndTime(momentOfTime + 1);
         } else {
             currentTask.setEndTime(momentOfTime);
         }
     }
-}
 
+    public static void printResult(Tasks completedTasks){
+        List<Task> completedTaskList = new ArrayList<>(completedTasks);
+        completedTaskList.sort(Comparator.comparing(Task::getId));
+
+        System.out.println(completedTaskList.stream().filter(task ->
+                task.getEndTime() <= task.getIssuingTime() + task.getLeadTime()).count());
+        for (Task task : completedTaskList) {
+            System.out.println(task.getStartTime() + " " + task.getEndTime());
+        }
+    }
+}
 
 class Task implements Comparable<Task> {
     private static AtomicInteger ID_GENERATOR = new AtomicInteger(1);
@@ -212,12 +213,12 @@ class TaskService {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         List<String> lines = new ArrayList<>();
-        try{
+        try {
             int numbersOfTasks = Integer.parseInt(bufferedReader.readLine());
             for (int i = 0; i < numbersOfTasks; i++) {
                 lines.add(bufferedReader.readLine());
             }
-        } catch (IOException ex){
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
 
@@ -252,16 +253,6 @@ class TaskService {
         return tasks.stream().sorted(Comparator.reverseOrder()).
                 filter(task -> task.getIssuingTime() + task.getLeadTime() >= momentOfTime + task.getElapsedTime())
                 .findFirst().orElse(null);
-    }
-
-    public static Task getActualShortTask(int momentOfTime, Tasks tasks) {
-        return tasks.stream()
-                .filter(task -> task.getIssuingTime() + task.getLeadTime() >= momentOfTime + task.getElapsedTime())
-                .min(Comparator.comparing(Task::getElapsedTime)).orElse(null);
-    }
-
-    public static Task getFreshTask(Tasks tasks) {
-        return tasks.stream().max(Comparator.naturalOrder()).orElse(null);
     }
 }
 
