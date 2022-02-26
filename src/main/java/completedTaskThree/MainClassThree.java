@@ -12,37 +12,41 @@ public class MainClassThree {
 
         Tasks tasks = TaskService.readTaskFromStream(inputStreamReader);
 
-        if (tasks.isEmpty()){
+        if (tasks.isEmpty()) {
+            printResult(null);
             return;
         }
 
         Tasks tasksBacklog = new Tasks();
         Tasks completedTasks = new Tasks();
         Tasks remainingTasks = new Tasks(tasks);
-
         Task currentTask = null;
-        for (int momentOfTime = 0; momentOfTime <= getMaxCount(tasks); momentOfTime++) {
+        int initialMoment = tasks.iterator().next().getIssuingTime();
+        int maxCount = getMaxCount(tasks);
+
+        for (int momentOfTime = initialMoment; momentOfTime < maxCount; momentOfTime++) {
             if (remainingTasks.isEmpty()) {
                 break;
             }
             if (TaskService.newTaskAppeared(momentOfTime, tasks)) {
                 Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
-                if(shouldExecute(newTask, tasksBacklog)){
-                    if (currentTask == null){
+                if (shouldExecute(newTask, tasksBacklog)) {
+                    if (currentTask == null) {
                         currentTask = newTask;
                     } else {
                         tasksBacklog.add(newTask);
                     }
+                } else {
+                    remainingTasks.remove(newTask);
                 }
             }
             if (currentTask == null) {
                 continue;
             }
-            if (currentTask.getElapsedTime() == 0) {
+            if (currentTask.getElapsedTime() <= 0) {
                 completedTasks.add(currentTask);
                 tasksBacklog.remove(currentTask);
                 remainingTasks.remove(currentTask);
-
                 currentTask = getTaskWhenCurrentTaskIsCompleted(tasksBacklog);
             }
             if (currentTask == null) {
@@ -54,28 +58,28 @@ public class MainClassThree {
     }
 
     public static int getMaxCount(Tasks tasks) {
-        return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime()).reduce(0, Integer::sum);
+        return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime() + task.getElapsedTime()).reduce(0, Integer::sum);
     }
 
-    public static boolean shouldExecute(Task newTask, Tasks backlog){
+    public static boolean shouldExecute(Task newTask, Tasks backlog) {
         int sumElapsedTime = backlog.stream().mapToInt(Task::getElapsedTime).sum() + newTask.getElapsedTime();
-        return newTask.getLeadTime() > sumElapsedTime;
+        return newTask.getLeadTime() >= sumElapsedTime;
     }
 
-    public static Task getTaskWhenCurrentTaskIsCompleted(Tasks backlog){
-        if (!backlog.isEmpty()){
-            return TaskService.getEarlyTask(backlog);
+    public static Task getTaskWhenCurrentTaskIsCompleted(Tasks backlog) {
+        if (backlog == null || backlog.isEmpty()) {
+            return null;
         }
-        return null;
+        return TaskService.getEarlyTask(backlog);
     }
 
     public static void printResult(Tasks completedTasks) {
-        if (completedTasks.isEmpty()) {
+        if (completedTasks == null || completedTasks.isEmpty()) {
             System.out.println(0);
             return;
         }
         System.out.println(completedTasks.size());
-        for (Task task: completedTasks){
+        for (Task task : completedTasks) {
             System.out.print(task.getId() + " ");
         }
     }
@@ -87,8 +91,6 @@ class Task implements Comparable<Task> {
     private int issuingTime;
     private int leadTime;
     private int elapsedTime;
-    private int startTime = 0;
-    private int endTime = 0;
 
     public Task(int issuingTime, int leadTime, int elapsedTime) {
         this.id = ID_GENERATOR.getAndIncrement();
@@ -125,22 +127,6 @@ class Task implements Comparable<Task> {
         this.elapsedTime = elapsedTime;
     }
 
-    public int getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(int startTime) {
-        this.startTime = startTime;
-    }
-
-    public int getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(int endTime) {
-        this.endTime = endTime;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -161,8 +147,6 @@ class Task implements Comparable<Task> {
                 ", issuingTime=" + issuingTime +
                 ", leadTime=" + leadTime +
                 ", elapsedTime=" + elapsedTime +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
                 '}';
     }
 
@@ -183,7 +167,7 @@ class TaskService {
                 lines.add(bufferedReader.readLine());
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.out.println(0);
         }
 
         Tasks tasks = new Tasks();

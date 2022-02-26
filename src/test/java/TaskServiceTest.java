@@ -20,7 +20,6 @@ public class TaskServiceTest {
         }
 
         tasks = TaskService.readTaskFromStream(inputStreamReader);
-
     }
 
     @org.testng.annotations.Test

@@ -22,7 +22,9 @@ public class MainClassTwo {
         List countOfIssuedTasksAtEachPointOfTime = new ArrayList<Integer>();
 
         Task currentTask = null;
-        for (int momentOfTime = 0; momentOfTime <= getMaxCount(tasks); momentOfTime++) {
+        int initialMoment = tasks.iterator().next().getIssuingTime();
+        int maxCount = getMaxCount(tasks);
+        for (int momentOfTime = initialMoment; momentOfTime <= maxCount; momentOfTime++) {
             if (remainingTasks.isEmpty()) {
                 break;
             }
@@ -37,7 +39,6 @@ public class MainClassTwo {
             if (currentTask.getElapsedTime() == 0) {
                 tasksBacklog.remove(currentTask);
                 remainingTasks.remove(currentTask);
-
                 currentTask = getTaskWhenCurrentTaskIsCompleted(momentOfTime, tasksBacklog);
             }
             if (currentTask == null) {
@@ -50,7 +51,7 @@ public class MainClassTwo {
     }
 
     public static int getMaxCount(Tasks tasks) {
-        return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime()).reduce(0, Integer::sum);
+        return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime() + task.getElapsedTime()).reduce(0, Integer::sum);
     }
 
     public static Task getTaskWhenNewTaskAppears(Tasks tasks, Tasks tasksBacklog, int momentOfTime, Task currentTask) {

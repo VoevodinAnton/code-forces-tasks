@@ -11,6 +11,7 @@ public class MainClassOne {
         Tasks tasks = TaskService.readTaskFromStream(inputStreamReader);
 
         if (tasks.isEmpty()){
+            printResult(null);
             return;
         }
 
@@ -19,7 +20,9 @@ public class MainClassOne {
         Tasks remainingTasks = new Tasks(tasks);
 
         Task currentTask = null;
-        for (int momentOfTime = 0; momentOfTime <= getMaxCount(tasks); momentOfTime++) {
+        int initialMoment = tasks.iterator().next().getIssuingTime();
+        int maxCount = getMaxCount(tasks);
+        for (int momentOfTime = initialMoment; momentOfTime <= maxCount; momentOfTime++) {
             if (remainingTasks.isEmpty()) {
                 break;
             }
@@ -78,7 +81,7 @@ public class MainClassOne {
     }
 
     public static int getMaxCount(Tasks tasks) {
-        return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime()).reduce(0, Integer::sum);
+        return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime() + task.getElapsedTime()).reduce(0, Integer::sum);
     }
 
     public static void setStartTime(Task currentTask, int momentOfTime) {
@@ -96,6 +99,10 @@ public class MainClassOne {
     }
 
     public static void printResult(Tasks completedTasks){
+        if (completedTasks == null || completedTasks.isEmpty()){
+            System.out.println(0);
+            return;
+        }
         List<Task> completedTaskList = new ArrayList<>(completedTasks);
         completedTaskList.sort(Comparator.comparing(Task::getId));
 
@@ -199,7 +206,6 @@ class Task implements Comparable<Task> {
 }
 
 class TaskService {
-
     public static Tasks readTaskFromStream(InputStreamReader inputStreamReader) {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
