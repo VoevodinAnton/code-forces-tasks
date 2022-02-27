@@ -215,6 +215,7 @@ class TaskService {
             for (int i = 0; i < numbersOfTasks; i++) {
                 lines.add(bufferedReader.readLine());
             }
+            bufferedReader.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

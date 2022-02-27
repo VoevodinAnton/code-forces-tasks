@@ -1,3 +1,7 @@
+package completedTaskOne;
+
+import completedTaskOne.TaskService;
+import completedTaskOne.Tasks;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -46,15 +50,5 @@ public class TaskServiceTest {
     @Test
     public void testGetActualFreshTask() {
         Assert.assertEquals(TaskService.getActualFreshTask(40, tasks), tasks.stream().toArray()[9]);
-    }
-
-    @Test
-    public void testGetActualShortTask() {
-        Assert.assertEquals(TaskService.getActualShortTask(50, tasks), tasks.stream().toArray()[7]);
-    }
-
-    @Test
-    public void testGetFreshTask() {
-        Assert.assertEquals(TaskService.getFreshTask(tasks), tasks.stream().toArray()[9]);
     }
 }
