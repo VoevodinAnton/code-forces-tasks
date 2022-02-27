@@ -30,12 +30,12 @@ public class MainClassFour {
     static void printResult(String translatedWord, int maxDistance, int minDistance) {
         StringBuilder line = new StringBuilder();
         line.append(translatedWord + " ");
-        if (maxDistance == -1){
+        if (maxDistance == -1) {
             line.append("ND" + " ");
         } else {
             line.append(maxDistance + " ");
         }
-        if (minDistance == -1){
+        if (minDistance == -1) {
             line.append("ND");
         } else {
             line.append(minDistance);
@@ -133,19 +133,13 @@ class TranslatedWordsService {
         }
 
         int maxDistance = -1;
-        Iterator<TranslatedWord> translatedWordsIterator = translatedWords.iterator();
-        while (translatedWordsIterator.hasNext()) {
-            TranslatedWord prevTranslatedWord = translatedWordsIterator.next();
-            if (translatedWordsIterator.hasNext()) {
-                TranslatedWord translatedWord = translatedWordsIterator.next();
-                if (prevTranslatedWord.isCorrectTranslation() && translatedWord.isCorrectTranslation()) {
-                    int distance = Math.abs(translatedWord.getId() - prevTranslatedWord.getId());
-                    if (maxDistance == -1) {
-                        maxDistance = distance;
-                    }
-                    if (distance > maxDistance) {
-                        maxDistance = distance;
-                    }
+        for (int i = 0; i < translatedWords.size() - 1; i++) {
+            TranslatedWord prevTranslatedWord = translatedWords.get(i);
+            TranslatedWord translatedWord = translatedWords.get(i + 1);
+            if (prevTranslatedWord.isCorrectTranslation() && translatedWord.isCorrectTranslation()) {
+                int distance = Math.abs(prevTranslatedWord.getId() - translatedWord.getId());
+                if (distance > maxDistance) {
+                    maxDistance = distance;
                 }
             }
         }
@@ -162,19 +156,16 @@ class TranslatedWordsService {
         }
 
         int minDistance = -1;
-        Iterator<TranslatedWord> translatedWordsIterator = translatedWords.iterator();
-        while (translatedWordsIterator.hasNext()) {
-            TranslatedWord prevTranslatedWord = translatedWordsIterator.next();
-            if (translatedWordsIterator.hasNext()) {
-                TranslatedWord translatedWord = translatedWordsIterator.next();
-                if (!prevTranslatedWord.isCorrectTranslation() && !translatedWord.isCorrectTranslation()) {
-                    int distance = Math.abs(translatedWord.getId() - prevTranslatedWord.getId());
-                    if (minDistance == -1) {
-                        minDistance = distance;
-                    }
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                    }
+        for (int i = 0; i < translatedWords.size() - 1; i++) {
+            TranslatedWord prevTranslatedWord = translatedWords.get(i);
+            TranslatedWord translatedWord = translatedWords.get(i + 1);
+            if (!prevTranslatedWord.isCorrectTranslation() && !translatedWord.isCorrectTranslation()) {
+                int distance = Math.abs(prevTranslatedWord.getId() - translatedWord.getId());
+                if (minDistance == -1) {
+                    minDistance = distance;
+                }
+                if (distance < minDistance) {
+                    minDistance = distance;
                 }
             }
         }
