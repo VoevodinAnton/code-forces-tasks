@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +30,7 @@ public class MainClassFive {
                 currentFilm = FilmService.getNextFilm(tempFilm, films);
                 //System.out.println(currentFilm);
             }
-            if (currentFilm == null){
+            if (currentFilm == null) {
                 break;
             }
         }
@@ -120,25 +119,24 @@ class Films extends ArrayList<Film> {
 }
 
 class FilmService {
-
     public static Films readFilmsFromStream(InputStreamReader inputStreamReader) {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        List<String> lines = new ArrayList<>();
+        Films films = new Films();
         try {
             int numbersOfFilms = Integer.parseInt(bufferedReader.readLine());
             for (int i = 0; i < numbersOfFilms; i++) {
-                lines.add(bufferedReader.readLine());
+                String[] line = bufferedReader.readLine().split(" ");
+                films.add(new Film(Integer.parseInt(line[0].trim()), Integer.parseInt(line[1].trim()), Integer.parseInt(line[2].trim())));
             }
-            bufferedReader.close();
         } catch (IOException ex) {
             ex.printStackTrace();
-        }
-
-        Films films = new Films();
-        for (String line : lines) {
-            String[] linePart = line.split(" ");
-            films.add(new Film(Integer.parseInt(linePart[0].trim()), Integer.parseInt(linePart[1].trim()), Integer.parseInt(linePart[2].trim())));
+        } finally {
+            try {
+                bufferedReader.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
 
         return films == null ? (Films) Collections.EMPTY_LIST : films;

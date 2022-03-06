@@ -1,19 +1,19 @@
-package completedTaskSix;
+package filmFestival;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
-public class MainClassSix {
+public class MainClassFilmFestival {
     public static void main(String[] args) {
         InputStreamReader inputStreamReader = new InputStreamReader(System.in);
 
         Films films = FilmService.readFilmsFromStream(inputStreamReader);
 
         if (films.isEmpty()) {
+            printResult(0, null, null);
             return;
         }
 
@@ -23,13 +23,16 @@ public class MainClassSix {
         int size = films.size();
 
         for (int i = 0; i < size; i++) {
-            for (int j = i + 1; j < size; j++) {
-                Film film = films.get(i);
-                Film nextFilm = films.get(j);
+            Film film = films.get(i);
+            int filmEndTime = film.getEndTime();
+            int filmStartTime = film.getStartTime();
 
+            for (int j = i + 1; j < size; j++) {
+                Film nextFilm = films.get(j);
                 int interest = film.getInterest() + nextFilm.getInterest();
-                if ((film.getEndTime() <= nextFilm.getStartTime()
-                        || nextFilm.getEndTime() <= film.getStartTime())
+
+                if ((filmEndTime <= nextFilm.getStartTime()
+                        || nextFilm.getEndTime() <= filmStartTime)
                         && interest > maxInterest) {
                     maxInterest = interest;
                     firstFilm = film;
@@ -42,7 +45,7 @@ public class MainClassSix {
     }
 
     public static void printResult(int interest, Film firstFilm, Film secondFilm) {
-        if (interest == 0) {
+        if (interest == 0 || firstFilm == null || secondFilm == null) {
             System.out.println(interest);
             System.out.print(-1 + " " + -1);
             return;
@@ -125,13 +128,18 @@ class FilmService {
             int numbersOfFilms = Integer.parseInt(bufferedReader.readLine());
             for (int i = 0; i < numbersOfFilms; i++) {
                 String[] line = bufferedReader.readLine().split(" ");
-                films.add(new Film(Integer.parseInt(line[0].trim()), Integer.parseInt(line[1].trim()), Integer.parseInt(line[2].trim())));
+                films.add(new Film(Integer.parseInt(line[0]), Integer.parseInt(line[1]), Integer.parseInt(line[2])));
             }
-            bufferedReader.close();
         } catch (IOException ex) {
             ex.printStackTrace();
+        } finally {
+            try {
+                bufferedReader.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
 
-        return films == null ? (Films) Collections.EMPTY_LIST : films;
+        return films;
     }
 }
