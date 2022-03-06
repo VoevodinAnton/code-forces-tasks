@@ -27,8 +27,9 @@ public class MainClassOne {
                 break;
             }
             //System.out.println(momentOfTime);
-            if (TaskService.newTaskAppeared(momentOfTime, tasks)) {
-                currentTask = getTaskWhenNewTaskAppears(tasks, tasksBacklog, momentOfTime, currentTask);
+            Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
+            if (newTask != null) {
+                currentTask = getTaskWhenNewTaskAppears(tasksBacklog, momentOfTime, newTask, currentTask);
             }
             if (currentTask == null) {
                 continue;
@@ -50,8 +51,7 @@ public class MainClassOne {
         printResult(completedTasks);
     }
 
-    public static Task getTaskWhenNewTaskAppears(Tasks tasks, Tasks tasksBacklog, int momentOfTime, Task currentTask) {
-        Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
+    public static Task getTaskWhenNewTaskAppears(Tasks tasksBacklog, int momentOfTime, Task newTask,  Task currentTask) {
         if (currentTask == null) {
             currentTask = newTask;
             setStartTime(currentTask, momentOfTime);
@@ -226,11 +226,7 @@ class TaskService {
             tasks.add(new Task(Integer.parseInt(time[0]), Integer.parseInt(time[1]), Integer.parseInt(time[2])));
         }
 
-        return tasks == null ? (Tasks) Collections.EMPTY_LIST : tasks;
-    }
-
-    public static boolean newTaskAppeared(int momentOfTime, Tasks tasks) {
-        return tasks.stream().anyMatch(task -> momentOfTime == task.getIssuingTime());
+        return tasks;
     }
 
     public static Task getShortTask(Tasks tasks) {

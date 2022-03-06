@@ -19,7 +19,7 @@ public class MainClassTwo {
 
         Tasks tasksBacklog = new Tasks();
         Tasks remainingTasks = new Tasks(tasks);
-        List countOfIssuedTasksAtEachPointOfTime = new ArrayList<Integer>();
+        List<Integer> countOfIssuedTasksAtEachPointOfTime = new ArrayList<Integer>();
 
         Task currentTask = null;
         int initialMoment = tasks.iterator().next().getIssuingTime();
@@ -29,8 +29,9 @@ public class MainClassTwo {
                 break;
             }
             //System.out.println(momentOfTime);
-            if (TaskService.newTaskAppeared(momentOfTime, tasks)) {
-                currentTask = getTaskWhenNewTaskAppears(tasks, tasksBacklog, momentOfTime, currentTask);
+            Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
+            if (newTask != null) {
+                currentTask = getTaskWhenNewTaskAppears(tasksBacklog, momentOfTime, newTask, currentTask);
             }
             countOfIssuedTasksAtEachPointOfTime.add(tasksBacklog.size());
             if (currentTask == null) {
@@ -54,10 +55,9 @@ public class MainClassTwo {
         return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime() + task.getElapsedTime()).reduce(0, Integer::sum);
     }
 
-    public static Task getTaskWhenNewTaskAppears(Tasks tasks, Tasks tasksBacklog, int momentOfTime, Task currentTask) {
-        Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
+    public static Task getTaskWhenNewTaskAppears(Tasks tasksBacklog, int momentOfTime, Task newTask,  Task currentTask) {
         if (currentTask == null) {
-            currentTask = newTask;
+            return newTask;
         }
         tasksBacklog.add(newTask);
         return currentTask;
@@ -85,7 +85,7 @@ public class MainClassTwo {
 }
 
 class Task implements Comparable<Task> {
-    private static AtomicInteger ID_GENERATOR = new AtomicInteger(1);
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
     private int id;
     private int issuingTime;
     private int leadTime;
@@ -196,11 +196,7 @@ class TaskService {
             tasks.add(new Task(Integer.parseInt(time[0]), Integer.parseInt(time[1]), Integer.parseInt(time[2])));
         }
 
-        return tasks == null ? (Tasks) Collections.EMPTY_LIST : tasks;
-    }
-
-    public static boolean newTaskAppeared(int momentOfTime, Tasks tasks) {
-        return tasks.stream().anyMatch(task -> momentOfTime == task.getIssuingTime());
+        return tasks;
     }
 
     public static Task getActualShortTask(int momentOfTime, Tasks tasks) {

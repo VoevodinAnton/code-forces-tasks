@@ -35,11 +35,6 @@ public class TaskServiceTest {
 
     @Test
     public void testNewTaskAppeared() {
-        Assert.assertEquals(true, TaskService.newTaskAppeared(0, tasks));
-        Assert.assertEquals(false, TaskService.newTaskAppeared(1, tasks));
-        Assert.assertEquals(true, TaskService.newTaskAppeared(5, tasks));
-        Assert.assertEquals(true, TaskService.newTaskAppeared(72, tasks));
-        Assert.assertEquals(false, TaskService.newTaskAppeared(40, tasks));
     }
 
     @Test
