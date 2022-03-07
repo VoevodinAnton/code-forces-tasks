@@ -19,7 +19,7 @@ public class MainClassTwo {
 
         Tasks tasksBacklog = new Tasks();
         Tasks remainingTasks = new Tasks(tasks);
-        List<Integer> countOfIssuedTasksAtEachPointOfTime = new ArrayList<Integer>();
+        List<Integer> countOfIssuedTasksAtEachPointOfTime = new ArrayList<>();
 
         Task currentTask = null;
         int initialMoment = tasks.iterator().next().getIssuingTime();
@@ -31,7 +31,10 @@ public class MainClassTwo {
             //System.out.println(momentOfTime);
             Task newTask = tasks.getTaskByIssuingTime(momentOfTime);
             if (newTask != null) {
-                currentTask = getTaskWhenNewTaskAppears(tasksBacklog, momentOfTime, newTask, currentTask);
+                if (currentTask == null) {
+                    currentTask = newTask;
+                }
+                tasksBacklog.add(newTask);
             }
             countOfIssuedTasksAtEachPointOfTime.add(tasksBacklog.size());
             if (currentTask == null) {
@@ -48,22 +51,15 @@ public class MainClassTwo {
             currentTask.setElapsedTime(currentTask.getElapsedTime() - 1);
         }
         printResult(countOfIssuedTasksAtEachPointOfTime);
-
     }
 
     public static int getMaxCount(Tasks tasks) {
         return tasks.stream().map(task -> task.getIssuingTime() + task.getLeadTime() + task.getElapsedTime()).reduce(0, Integer::sum);
     }
 
-    public static Task getTaskWhenNewTaskAppears(Tasks tasksBacklog, int momentOfTime, Task newTask,  Task currentTask) {
-        if (currentTask == null) {
-            return newTask;
-        }
-        tasksBacklog.add(newTask);
-        return currentTask;
-    }
 
     public static Task getTaskWhenCurrentTaskIsCompleted(int momentOfTime, Tasks tasksBacklog) {
+
         Task currentTask = TaskService.getActualShortTask(momentOfTime, tasksBacklog);
         if (currentTask == null) {
             currentTask = TaskService.getFreshTask(tasksBacklog);
@@ -85,13 +81,11 @@ public class MainClassTwo {
 }
 
 class Task implements Comparable<Task> {
-    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
+    private static AtomicInteger ID_GENERATOR = new AtomicInteger(1);
     private int id;
     private int issuingTime;
     private int leadTime;
     private int elapsedTime;
-    private int startTime = 0;
-    private int endTime = 0;
 
     public Task(int issuingTime, int leadTime, int elapsedTime) {
         this.id = ID_GENERATOR.getAndIncrement();
@@ -108,16 +102,8 @@ class Task implements Comparable<Task> {
         return issuingTime;
     }
 
-    public void setIssuingTime(int issuingTime) {
-        this.issuingTime = issuingTime;
-    }
-
     public int getLeadTime() {
         return leadTime;
-    }
-
-    public void setLeadTime(int leadTime) {
-        this.leadTime = leadTime;
     }
 
     public int getElapsedTime() {
@@ -128,21 +114,6 @@ class Task implements Comparable<Task> {
         this.elapsedTime = elapsedTime;
     }
 
-    public int getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(int startTime) {
-        this.startTime = startTime;
-    }
-
-    public int getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(int endTime) {
-        this.endTime = endTime;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -164,8 +135,6 @@ class Task implements Comparable<Task> {
                 ", issuingTime=" + issuingTime +
                 ", leadTime=" + leadTime +
                 ", elapsedTime=" + elapsedTime +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
                 '}';
     }
 
@@ -200,9 +169,25 @@ class TaskService {
     }
 
     public static Task getActualShortTask(int momentOfTime, Tasks tasks) {
-        return tasks.stream()
+        Task actualShortTask = tasks.stream()
                 .filter(task -> task.getIssuingTime() + task.getLeadTime() >= momentOfTime + task.getElapsedTime())
                 .min(Comparator.comparing(Task::getElapsedTime)).orElse(null);
+
+        if (actualShortTask != null) {
+            Task actualShortTask1 = tasks.stream()
+                    .filter(task -> task.getIssuingTime() + task.getLeadTime() >= momentOfTime + task.getElapsedTime())
+                    .filter(task -> task.getElapsedTime() == actualShortTask.getElapsedTime())
+                    .min(Comparator.comparingInt(task -> task.getIssuingTime() + task.getLeadTime())).orElse(null);
+
+            if (actualShortTask1 != null) {
+                return tasks.stream()
+                        .filter(task -> task.getIssuingTime() + task.getLeadTime() >= momentOfTime + task.getElapsedTime())
+                        .filter(task -> task.getElapsedTime() == actualShortTask.getElapsedTime())
+                        .filter(task -> task.getIssuingTime() + task.getLeadTime() == actualShortTask1.getIssuingTime() + actualShortTask1.getLeadTime())
+                        .min(Comparator.comparingInt(task -> task.getIssuingTime() + task.getElapsedTime())).orElse(null);
+            }
+        }
+        return null;
     }
 
     public static Task getFreshTask(Tasks tasks) {
@@ -220,11 +205,6 @@ class Tasks extends HashSet<Task> {
     }
 
     public Task getTaskByIssuingTime(int momentOfTime) {
-        for (Task task : this) {
-            if (task.getIssuingTime() == momentOfTime) {
-                return task;
-            }
-        }
-        return null;
+        return this.stream().filter(task -> task.getIssuingTime() == momentOfTime).findFirst().orElse(null);
     }
 }

@@ -117,13 +117,6 @@ class DancingSchool{
 
 class DancingSchools extends ArrayList<DancingSchool>{
 
-    public DancingSchools(DancingSchools dancingSchools) {
-        super(dancingSchools);
-    }
-
-    public DancingSchools(){
-
-    }
 }
 
 class Dancer{

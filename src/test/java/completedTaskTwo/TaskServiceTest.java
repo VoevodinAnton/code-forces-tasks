@@ -21,6 +21,7 @@ public class TaskServiceTest {
 
     @Test
     public void testGetActualShortTask() {
+        System.out.println(TaskService.getActualShortTask(32, tasks));
     }
 
     @Test
