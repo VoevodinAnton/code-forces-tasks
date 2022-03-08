@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,7 +20,7 @@ public class MainClassFive {
         Films watchedFilms = new Films();
 
         Film currentFilm = films.get(0);
-        while (true) {
+        do {
             if (!FilmService.isInterestingFilm(currentFilm, films)) {
                 currentFilm = FilmService.getInterestingFilm(currentFilm, films);
             } else {
@@ -30,30 +29,30 @@ public class MainClassFive {
                 currentFilm = FilmService.getNextFilm(tempFilm, films);
                 //System.out.println(currentFilm);
             }
-            if (currentFilm == null) {
-                break;
-            }
-        }
+        } while (currentFilm != null);
         printResult(watchedFilms);
     }
 
     public static void printResult(Films watchedFilms) {
+        StringBuilder result = new StringBuilder();
         if (watchedFilms == null || watchedFilms.isEmpty()) {
             System.out.println(0);
+            return;
         }
-        System.out.println(watchedFilms.size());
+        result.append(watchedFilms.size()).append("\n");
         for (Film film : watchedFilms) {
-            System.out.print(film.getId() + " ");
+            result.append(film.getId()).append(" ");
         }
+        System.out.println(result);
     }
 }
 
 class Film {
-    private static AtomicInteger ID_GENERATOR = new AtomicInteger(1);
-    private int id;
-    private int startTime;
-    private int endTime;
-    private int interest;
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
+    private final int id;
+    private final int startTime;
+    private final int endTime;
+    private final int interest;
 
     public Film(int startTime, int endTime, int interest) {
         this.id = ID_GENERATOR.getAndIncrement();
@@ -70,25 +69,15 @@ class Film {
         return startTime;
     }
 
-    public void setStartTime(int startTime) {
-        this.startTime = startTime;
-    }
 
     public int getEndTime() {
         return endTime;
-    }
-
-    public void setEndTime(int endTime) {
-        this.endTime = endTime;
     }
 
     public int getInterest() {
         return interest;
     }
 
-    public void setInterest(int interest) {
-        this.interest = interest;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -139,7 +128,7 @@ class FilmService {
             }
         }
 
-        return films == null ? (Films) Collections.EMPTY_LIST : films;
+        return films;
     }
 
 

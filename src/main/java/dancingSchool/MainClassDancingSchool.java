@@ -89,9 +89,9 @@ public class MainClassDancingSchool {
 }
 
 class DancingSchool{
-    private static AtomicInteger ID_GENERATOR = new AtomicInteger(1);
-    private int id;
-    private List<String> danceMoves;
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
+    private final int id;
+    private final List<String> danceMoves;
 
     public DancingSchool(List<String> danceMoves){
         this.id = ID_GENERATOR.getAndIncrement();
@@ -120,7 +120,7 @@ class DancingSchools extends ArrayList<DancingSchool>{
 }
 
 class Dancer{
-    private List<String> danceMovesToLearn;
+    private final List<String> danceMovesToLearn;
 
     public Dancer(List<String> danceMovesToLearn) {
         this.danceMovesToLearn = danceMovesToLearn;
@@ -139,7 +139,7 @@ class Dancer{
 }
 
 class DancerService{
-    private Dancer dancer;
+    private final Dancer dancer;
 
     public DancerService(Dancer dancer) {
         this.dancer = dancer;

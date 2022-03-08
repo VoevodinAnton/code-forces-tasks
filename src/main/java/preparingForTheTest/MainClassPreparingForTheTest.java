@@ -13,8 +13,6 @@ public class MainClassPreparingForTheTest {
 
         Trio<Student, Textbook, Tasks> object = Utils.readTextbookAndTasksFromStream(inputStreamReader);
 
-
-
         Student student = object.first;
         Textbook textbook = object.second;
         Tasks tasks = object.third;
@@ -31,19 +29,18 @@ public class MainClassPreparingForTheTest {
 
             student.leaveUnstudiedThemesInTask(textbook, task);
 
-            if (task.isComplete()) {
-                completedTasks.add(task.getId());
-                continue;
-            }
             student.readThemesRequiredForTask(textbook, task);
-            if (task.isComplete()) {
-                completedTasks.add(task.getId());
-            }
+
+            student.leaveUnstudiedThemesInTask(textbook, task);
 
             int finalCursor = textbook.getCursor();
             if (finalCursor > initialCursor) {
                 numberOfTextbookHits++;
                 startThemes.add(textbook.getThemes().get(initialCursor));
+            }
+
+            if (task.isComplete()) {
+                completedTasks.add(task.getId());
             }
         }
 
@@ -128,7 +125,8 @@ class Task {
     @Override
     public String toString() {
         return "Task{" +
-                "themesToStudy=" + themesToStudy +
+                "id=" + id +
+                ", themesToStudy=" + themesToStudy +
                 '}';
     }
 }
@@ -161,6 +159,10 @@ class Student {
         }
     }
 
+    public void leaveUnstudiedThemesInTask(Textbook textbook, Task task) {
+        task.getThemesToStudy().removeAll(textbook.getThemes().subList(0, textbook.getCursor()));
+    }
+
     public void readThemesRequiredForTask(Textbook textbook, Task task) {
         int initialCursor = textbook.getCursor();
         List<String> themesToStudy = task.getThemesToStudy().stream().filter(theme -> markedThemes.get(theme) >= k).collect(Collectors.toList());
@@ -172,6 +174,7 @@ class Student {
                 }
                 textbook.increaseCursor();
                 String themeInTextbook = textbook.getThemes().get(i);
+                //System.out.println("task: " + task.getId() + " theme in textbook: " + themeInTextbook + " cursor " + textbook.getCursor());
                 for (String theme : themesToStudy) {
                     if (themeInTextbook.equals(theme)) {
                         task.getThemesToStudy().remove(theme);
@@ -180,10 +183,6 @@ class Student {
                 }
             }
         }
-    }
-
-    public void leaveUnstudiedThemesInTask(Textbook textbook, Task task) {
-        task.getThemesToStudy().removeAll(textbook.getThemes().subList(0, textbook.getCursor()));
     }
 
     @Override

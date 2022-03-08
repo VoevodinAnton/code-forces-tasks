@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import static org.testng.Assert.*;
 
 public class UtilsTest {
-    public static final String FILEPATH = "src/main/resources/preparing-for-the-test/Example1.txt";
+    public static final String FILEPATH = "src/main/resources/preparing-for-the-test/Example4.txt";
 
     Student student;
     Textbook textbook;
