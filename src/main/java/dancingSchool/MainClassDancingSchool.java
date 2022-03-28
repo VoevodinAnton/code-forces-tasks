@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/*Школы танцев*/
 public class MainClassDancingSchool {
 
     public static void main(String[] args){
@@ -19,44 +20,34 @@ public class MainClassDancingSchool {
         Dancer dancer = dancerAndDancingSchools.first;
         DancingSchools dancingSchools = dancerAndDancingSchools.second;
         DancerService dancerService = new DancerService(dancer);
-        //System.out.println("moves to learn: " + dancer.getDanceMovesToLearn());
-        //DancingSchools remainingDancingSchool = new DancingSchools(dancingSchools);
         int p = 0;
 
         StringBuilder schoolsWithTwoOrMoreNewDancingMove = new StringBuilder();
         int countSchoolsWithTwoOrMoreNewDancingMove = 0;
         for (DancingSchool dancingSchool: dancingSchools){
-            List<String> newDanceMovesForDancer = dancerService.getNewDanceMovesForDancer(dancingSchool);
+            List<String> newDanceMovesForDancer = dancerService.getNewDanceMovesForDancer(dancingSchool); //выбираем движения, которые танцор еще не изучил
 
             if (newDanceMovesForDancer.size() >= 2) {
                 dancer.getDanceMovesToLearn().removeAll(newDanceMovesForDancer);
-                //System.out.println("dancing school " + dancingSchool.getId() + " moves to learn " + dancer.getDanceMovesToLearn());
-                //remainingDancingSchool.remove(dancingSchool);
                 schoolsWithTwoOrMoreNewDancingMove.append(dancingSchool.getId()).append(" ");
                 countSchoolsWithTwoOrMoreNewDancingMove++;
             }
-            /*
-            else if (newDanceMovesForDancer.size() == 0) {
-                remainingDancingSchool.remove(dancingSchool);
-            }
-             */
         }
 
-        if (dancer.getDanceMovesToLearn().isEmpty()){
+        if (dancer.getDanceMovesToLearn().isEmpty()){ //если танцор изучил все движения, при этом посещая занятия, где изучал не менее одного движения,  то p = 2
             p = 2;
             printResult(p, schoolsWithTwoOrMoreNewDancingMove.toString(), countSchoolsWithTwoOrMoreNewDancingMove, null, 0);
             return;
         }
         StringBuilder schoolsWithOneNewDancingMove = new StringBuilder();
         int countSchoolsWithOneNewDancingMove = 0;
-        for (DancingSchool dancingSchool: dancingSchools){
-            List<String> newDanceMovesForDancer = dancerService.getNewDanceMovesForDancer(dancingSchool);
+        for (DancingSchool dancingSchool: dancingSchools){ //доучиваем движения, но у же посещаем занятия, где изучаем по одному движению
+            List<String> newDanceMovesForDancer = dancerService.getNewDanceMovesForDancer(dancingSchool); //выбираем движения, которые танцор еще не изучил
 
             if (newDanceMovesForDancer.size() == 1){
-                dancer.getDanceMovesToLearn().removeAll(newDanceMovesForDancer);
+                dancer.getDanceMovesToLearn().removeAll(newDanceMovesForDancer); //удаляем новые движения из списка движений, которые нужно изучить
                 schoolsWithOneNewDancingMove.append(dancingSchool.getId()).append(" ");
                 countSchoolsWithOneNewDancingMove++;
-                //System.out.println("1 dancing school " + dancingSchool.getId() + " moves to learn " + dancer.getDanceMovesToLearn());
             }
         }
 
@@ -114,7 +105,7 @@ class DancingSchool{
                 '}';
     }
 }
-
+/*Список школ танцев*/
 class DancingSchools extends ArrayList<DancingSchool>{
 
 }
@@ -172,7 +163,7 @@ class DancerService{
         return new Pair<>(dancer, dancingSchools);
     }
 
-    public List<String> getNewDanceMovesForDancer(DancingSchool dancingSchool){
+    public List<String> getNewDanceMovesForDancer(DancingSchool dancingSchool){ //выбираем те движения, которые еще не изучены
         return dancingSchool.getDanceMoves().stream()
                 .filter(dancingMove -> dancer.getDanceMovesToLearn().contains(dancingMove)).collect(Collectors.toList());
     }

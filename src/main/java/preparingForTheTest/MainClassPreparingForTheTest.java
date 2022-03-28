@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/*Подготовка к контрольной*/
 public class MainClassPreparingForTheTest {
     public static void main(String[] args) {
         InputStreamReader inputStreamReader = new InputStreamReader(System.in);
@@ -21,9 +22,8 @@ public class MainClassPreparingForTheTest {
         List<Integer> completedTasks = new ArrayList<>();
         List<String> startThemes = new ArrayList<>();
 
-        //long start = System.currentTimeMillis();
         for (Task task : tasks) {
-            int initialCursor = textbook.getCursor();
+            int initialCursor = textbook.getCursor(); //
 
             student.markThemes(task);
 
@@ -66,10 +66,11 @@ public class MainClassPreparingForTheTest {
     }
 }
 
+/*учебник, который читает Фалалей*/
 class Textbook {
-    private int cursor = 0;
+    private int cursor = 0; //тема на которой Фалалей остановился читать
     private final int size;
-    private final List<String> themes;
+    private final List<String> themes; //список тем в учебнике
 
     public Textbook(List<String> themes) {
         this.themes = new ArrayList<>(themes);
@@ -100,6 +101,7 @@ class Textbook {
     }
 }
 
+/*задачи, которые решает Фалалей*/
 class Task {
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
     private final int id;
@@ -133,10 +135,11 @@ class Task {
 
 class Tasks extends ArrayList<Task> { }
 
+/*Фалалей*/
 class Student {
     private final int k;
     private final int m;
-    private final Map<String, Integer> markedThemes;
+    private final Map<String, Integer> markedThemes; //темы, которые встретились Фалалею и сколько раз они встретились
 
     public Student(int k, int m) {
         this.k = k;
@@ -148,6 +151,7 @@ class Student {
         return markedThemes;
     }
 
+    //из каждой сабтаски Фалалей себе помечает какие темы упоминаются в этой таске, если тема уже встречалась ему, то он увеличивает счетчик на 1
     public void markThemes(Task task) {
         List<String> themesToStudy = task.getThemesToStudy();
         for (String s : themesToStudy) {
@@ -159,10 +163,12 @@ class Student {
         }
     }
 
+    //оставляем еще не пройденные темы
     public void leaveUnstudiedThemesInTask(Textbook textbook, Task task) {
         task.getThemesToStudy().removeAll(textbook.getThemes().subList(0, textbook.getCursor()));
     }
 
+    //читаем темы из учебник, которые необходимы, чтобы решить сабтаску
     public void readThemesRequiredForTask(Textbook textbook, Task task) {
         int initialCursor = textbook.getCursor();
         List<String> themesToStudy = task.getThemesToStudy().stream().filter(theme -> markedThemes.get(theme) >= k).collect(Collectors.toList());
@@ -174,7 +180,6 @@ class Student {
                 }
                 textbook.increaseCursor();
                 String themeInTextbook = textbook.getThemes().get(i);
-                //System.out.println("task: " + task.getId() + " theme in textbook: " + themeInTextbook + " cursor " + textbook.getCursor());
                 for (String theme : themesToStudy) {
                     if (themeInTextbook.equals(theme)) {
                         task.getThemesToStudy().remove(theme);

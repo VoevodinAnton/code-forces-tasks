@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/*Кинофестиваль*/
 public class MainClassFilmFestival {
     public static void main(String[] args) {
         InputStreamReader inputStreamReader = new InputStreamReader(System.in);
@@ -21,7 +22,7 @@ public class MainClassFilmFestival {
         Film firstFilm = null;
         Film secondFilm = null;
         int size = films.size();
-
+        //из всего списка фильмов выбираем два, у которых в сумме максимальная интересность
         for (int i = 0; i < size; i++) {
             Film film = films.get(i);
             int filmEndTime = film.getEndTime();
